@@ -44,8 +44,8 @@ public class ProdutoService {
         return produtoRepository.findById(id).orElseThrow(() -> new RuntimeException("Produto não encontrado."));
     }
 
-    public void updateProduto(ProdutoDto produtoDto){
-        Produto produtoExistente = findById(produtoDto.id());
+    public Produto updateProduto(String id, ProdutoDto produtoDto){
+        Produto produtoExistente = findById(id);
 
         if (produtoDto.nome() != null){
             produtoExistente.setNome(produtoDto.nome());
@@ -59,7 +59,7 @@ public class ProdutoService {
             produtoExistente.setPreco(produtoDto.preco());
         }
 
-        produtoRepository.save(produtoExistente);
+        return produtoRepository.save(produtoExistente);
     }
 
     public void deleteProduto(String id){

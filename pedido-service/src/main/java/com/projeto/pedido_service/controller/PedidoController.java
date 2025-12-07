@@ -46,7 +46,7 @@ public class PedidoController {
 
     @GetMapping
     public ResponseEntity<List<Pedido>> getAllPedidos(){
-        List<Pedido> pedidos = this.pedidoService.getAllPedidos();
+        List<Pedido> pedidos = pedidoService.getAllPedidos();
         if (pedidos.isEmpty()){
             return ResponseEntity.noContent().build();
         }

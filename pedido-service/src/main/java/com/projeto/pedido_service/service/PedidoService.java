@@ -49,12 +49,12 @@ public class PedidoService {
     }
 
     @Transactional
-    public Pedido findById(Long id) throws Exception{
-        return pedidoRepository.findById(id).orElseThrow(() -> new Exception("Pedido não encontrado"));
+    public Pedido findById(Long id) {
+        return pedidoRepository.findById(id).orElseThrow(() -> new RuntimeException("Pedido não encontrado"));
     }
 
     @Transactional
-    public void deletePedido(Long id) throws Exception{
+    public void deletePedido(Long id) {
         Pedido apagarPedido = findById(id);
         pedidoRepository.delete(apagarPedido);
     }
