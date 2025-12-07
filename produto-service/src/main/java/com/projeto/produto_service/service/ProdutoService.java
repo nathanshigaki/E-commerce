@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.projeto.produto_service.dto.ProdutoDto;
+import com.projeto.produto_service.dto.ProdutoUpdateDto;
 import com.projeto.produto_service.model.Produto;
 import com.projeto.produto_service.repository.ProdutoRepository;
 
@@ -44,19 +45,18 @@ public class ProdutoService {
         return produtoRepository.findById(id).orElseThrow(() -> new RuntimeException("Produto não encontrado."));
     }
 
-    public Produto updateProduto(String id, ProdutoDto produtoDto){
+    public Produto updateProduto(String id, ProdutoUpdateDto updateDto){
         Produto produtoExistente = findById(id);
 
-        if (produtoDto.nome() != null){
-            produtoExistente.setNome(produtoDto.nome());
-        }
+        if (updateDto.getNome() != null) produtoExistente.setNome(updateDto.getNome());
+        if (updateDto.getDescricao() != null) produtoExistente.setDescricao(updateDto.getDescricao());
         
-        if (produtoDto.descricao() != null) {
-            produtoExistente.setDescricao(produtoDto.descricao());
-        } 
-        
-        if (produtoDto.preco() != null && produtoDto.preco().compareTo(BigDecimal.ZERO)>0){
-            produtoExistente.setPreco(produtoDto.preco());
+        if (updateDto.getPreco() != null) {
+            if (updateDto.getPreco().compareTo(BigDecimal.ZERO) > 0) {
+                produtoExistente.setPreco(updateDto.getPreco());
+            } else {
+                throw new IllegalArgumentException("O preço não pode ser negativo.");
+            }
         }
 
         return produtoRepository.save(produtoExistente);

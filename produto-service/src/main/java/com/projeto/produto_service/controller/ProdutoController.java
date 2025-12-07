@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.projeto.produto_service.dto.ProdutoDto;
+import com.projeto.produto_service.dto.ProdutoUpdateDto;
 import com.projeto.produto_service.model.Produto;
 import com.projeto.produto_service.service.ProdutoService;
 
@@ -63,9 +64,9 @@ public class ProdutoController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<Produto> updateProduto(@PathVariable String id, @RequestBody ProdutoDto produtoDto){
+    public ResponseEntity<Produto> updateProduto(@PathVariable String id, @RequestBody ProdutoUpdateDto updateDto){
         try{
-            Produto atualizadoProduto = produtoService.updateProduto(id, produtoDto);
+            Produto atualizadoProduto = produtoService.updateProduto(id, updateDto);
             return ResponseEntity.ok(atualizadoProduto);
         } catch (Exception e){
             return ResponseEntity.notFound().build();
