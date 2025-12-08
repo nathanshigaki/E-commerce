@@ -4,7 +4,20 @@ import java.math.BigDecimal;
 
 import com.projeto.produto_service.model.Produto;
 
-public record ProdutoRequest(String nome, String descricao, BigDecimal preco) {
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
+
+public record ProdutoRequest(
+    
+    @NotBlank(message = "O produto deve ter nome.")
+    String nome, 
+
+    String descricao, 
+
+    @NotNull(message = "O produto deve ter preço mairo que zero.")
+    @PositiveOrZero(message = "O preço deve ser maior que zero.")
+    BigDecimal preco) {
 
     public Produto toProduto() {
         Produto produto = new Produto();

@@ -20,15 +20,6 @@ public class ProdutoService {
     private final ProdutoRepository produtoRepository;
 
     public ProdutoResponse createProduto(ProdutoRequest produtoRequest){
-
-        if (produtoRequest.nome() == null){
-            throw new IllegalArgumentException("O produto deve ter um nome");
-        } 
-        
-        if (produtoRequest.preco() == null || produtoRequest.preco().compareTo(BigDecimal.ZERO)<0) {
-            throw new IllegalArgumentException("O preço não pode ser nulo ou negativo.");
-        }
-
         Produto produtoSalvar = produtoRequest.toProduto();
         Produto produtoSalvo = produtoRepository.save(produtoSalvar);
         return ProdutoResponse.fromProduto(produtoSalvo);
@@ -55,10 +46,10 @@ public class ProdutoService {
         if (updateDto.getDescricao() != null) produtoUpdate.setDescricao(updateDto.getDescricao());
         
         if (updateDto.getPreco() != null) {
-            if (updateDto.getPreco().compareTo(BigDecimal.ZERO) > 0) {
+            if (updateDto.getPreco().compareTo(BigDecimal.ZERO) >= 0) {
                 produtoUpdate.setPreco(updateDto.getPreco());
             } else {
-                throw new IllegalArgumentException("O preço não pode ser negativo.");
+                throw new IllegalArgumentException("O preço deve ser maior que zero.");
             }
         }
 

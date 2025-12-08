@@ -18,6 +18,7 @@ import com.projeto.produto_service.dto.ProdutoResponse;
 import com.projeto.produto_service.dto.ProdutoUpdateDto;
 import com.projeto.produto_service.service.ProdutoService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -28,7 +29,7 @@ public class ProdutoController {
     private final ProdutoService produtoService;
 
     @PostMapping
-    public ResponseEntity<ProdutoResponse> createProduto(@RequestBody ProdutoRequest produtoRequest){
+    public ResponseEntity<ProdutoResponse> createProduto(@RequestBody @Valid ProdutoRequest produtoRequest){
         return ResponseEntity.status(HttpStatus.CREATED).body(produtoService.createProduto(produtoRequest));
     }
 

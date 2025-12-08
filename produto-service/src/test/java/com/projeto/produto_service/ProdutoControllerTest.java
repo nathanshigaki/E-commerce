@@ -1,48 +1,50 @@
 package com.projeto.produto_service;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.context.annotation.Import;
 
 import com.projeto.produto_service.dto.ProdutoRequest;
-import com.projeto.produto_service.dto.ProdutoResponse;
 import com.projeto.produto_service.dto.ProdutoUpdateDto;
-import com.projeto.produto_service.service.ProdutoService;
+import com.projeto.produto_service.model.Produto;
+import com.projeto.produto_service.repository.ProdutoRepository;
 
 import io.restassured.response.Response;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@Import(TestcontainersConfiguration.class)
 class ProdutoControllerTest {
 
 	@LocalServerPort
     private Integer port;
 
-	@MockitoBean
-	private ProdutoService produtoService;
+	@Autowired
+	private ProdutoRepository produtoRepository;
 
     @BeforeEach
     void setup() {
         RestAssured.baseURI = "http://localhost";
         RestAssured.port = port;
+
+		produtoRepository.deleteAll();
     }
 
 	@Test
 	void shouldCreateProduto(){
 		ProdutoRequest produtoRequest = getProdutoRequest();
-		ProdutoResponse produtoResponse = getProdutoResponse(produtoRequest);
-
-		Mockito.when(produtoService.createProduto(produtoRequest)).thenReturn(produtoResponse);
 
 		Response response = RestAssured.given()
 			.contentType("application/json")
@@ -59,16 +61,19 @@ class ProdutoControllerTest {
 
 		BigDecimal precoRetornado = response.jsonPath().getObject("preco", BigDecimal.class);
 		assertEquals(0, produtoRequest.preco().compareTo(precoRetornado));
+
+		assertEquals(1, produtoRepository.count());
+        
+        Produto produtoSalvo = produtoRepository.findAll().get(0);
+        assertEquals(produtoRequest.nome(), produtoSalvo.getNome());
 	}
 
 	@Test
 	void shouldGetAllProduto(){
-		ProdutoResponse p1 = new ProdutoResponse("123", "Teclado", "Teclado mecanico", new BigDecimal(300));
-		ProdutoResponse p2 = new ProdutoResponse("456", "Mouse", "Logitech", new BigDecimal(120));
+		Produto p1 = Produto.builder().nome("Teclado").descricao("Teclado mecanico").preco(new BigDecimal(300)).build();
+		Produto p2 = Produto.builder().nome("Mouse").descricao("Logitech").preco(new BigDecimal(120)).build();
 
-		List<ProdutoResponse> listaProdutoResponse = List.of(p1, p2);
-
-		Mockito.when(produtoService.getAllProdutos()).thenReturn(listaProdutoResponse);
+		produtoRepository.saveAll(List.of(p1, p2));
 
 		RestAssured.given()
 			.contentType(ContentType.JSON)
@@ -84,75 +89,68 @@ class ProdutoControllerTest {
 
 	@Test
 	void shouldFindById(){
-		ProdutoRequest produtoRequest = getProdutoRequest();
-		ProdutoResponse produtoResponse = getProdutoResponse(produtoRequest);
-
-		Mockito.when(produtoService.findById(produtoResponse.id())).thenReturn(produtoResponse);
+		Produto produto = Produto.builder().nome("Monitor").descricao("240hz").preco(new BigDecimal(420)).build();
+		produto = produtoRepository.save(produto);
+		String id = produto.getId();
 
 		Response response = RestAssured.given()
 			.contentType(ContentType.JSON)
 			.when()
-			.get("api/produto/{id}", "a12bc3")
+			.get("api/produto/{id}", id)
 			.then()
 			.log().all()
 			.extract().response();
 
 		assertEquals(200, response.statusCode());
-		assertEquals("a12bc3", response.jsonPath().getString("id"));
-		assertEquals(produtoRequest.nome(), response.jsonPath().getString("nome"));
+		assertEquals(id, response.jsonPath().getString("id"));
+		assertEquals(produto.getNome(), response.jsonPath().getString("nome"));
 
 		BigDecimal precoRetornado = response.jsonPath().getObject("preco", BigDecimal.class);
-		assertEquals(0, produtoRequest.preco().compareTo(precoRetornado));
+		assertEquals(0, produto.getPreco().compareTo(precoRetornado));
 	}
 
 	@Test
 	void shouldUpdateProduto(){
+		Produto produto = Produto.builder().nome("Cadeira").descricao("Simples").preco(new BigDecimal(420)).build();
+		produto = produtoRepository.save(produto);
+
 		ProdutoUpdateDto updateDto = new ProdutoUpdateDto();
-		updateDto.setPreco(new BigDecimal(150));
-
-		String id = "a12bc3";
-		ProdutoRequest produtoRequest = getProdutoRequest();
-		ProdutoResponse produtoResponse = new ProdutoResponse(
-				id, produtoRequest.nome(), 
-				produtoRequest.descricao(), 
-				new BigDecimal(150));
-
-		Mockito.when(produtoService.updateProduto(id, updateDto)).thenReturn(produtoResponse);
+        updateDto.setPreco(new BigDecimal(800)); 
+        updateDto.setNome("Cadeira Gamer");
 
 		Response response = RestAssured.given()
 			.contentType(ContentType.JSON)
 			.body(updateDto)
 			.when()
-			.patch("api/produto/{id}", "a12bc3")
+			.patch("api/produto/{id}", produto.getId())
 			.then()
 			.log().all()
 			.extract().response();
 
 		assertEquals(200, response.statusCode());
-    	assertEquals("Caneta", response.jsonPath().getString("nome"));
+    	assertEquals("Cadeira Gamer", response.jsonPath().getString("nome"));
 
-		BigDecimal precoRetornado = response.jsonPath().getObject("preco", BigDecimal.class);
-    	assertEquals(0, new BigDecimal("150.00").compareTo(precoRetornado));
+		Produto produtoAtualizado = produtoRepository.findById(produto.getId()).orElseThrow();
+        assertEquals(0, new BigDecimal(800).compareTo(produtoAtualizado.getPreco()));
 	}
 
 	@Test
 	void shouldDeleteProduto(){
-		Mockito.doNothing().when(produtoService).deleteProduto("a12bc3");
+		Produto produto = Produto.builder().nome("Mesa").descricao("Simples").preco(new BigDecimal(230)).build();
+		produto = produtoRepository.save(produto);
 
 		RestAssured.given()
 			.contentType(ContentType.JSON)
 			.when()
-			.delete("api/produto/{id}", "a12bc3")
+			.delete("api/produto/{id}", produto.getId())
 			.then()
 			.statusCode(204);
+		
+		Optional<Produto> busca = produtoRepository.findById(produto.getId());
+        assertFalse(busca.isPresent());
 	}
 
 	public ProdutoRequest getProdutoRequest(){
 		return new ProdutoRequest("Caneta", "Caneta azul", new BigDecimal(4));
-	}
-
-	public ProdutoResponse getProdutoResponse(ProdutoRequest produtoRequest){
-		String id = "a12bc3";
-		return new ProdutoResponse(id, produtoRequest.nome(), produtoRequest.descricao(), produtoRequest.preco());
 	}
 }
