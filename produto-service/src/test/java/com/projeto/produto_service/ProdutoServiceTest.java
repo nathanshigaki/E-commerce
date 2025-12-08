@@ -22,6 +22,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.projeto.produto_service.dto.ProdutoRequest;
 import com.projeto.produto_service.dto.ProdutoResponse;
 import com.projeto.produto_service.dto.ProdutoUpdateDto;
+import com.projeto.produto_service.exception.ProdutoNotFoundException;
 import com.projeto.produto_service.model.Produto;
 import com.projeto.produto_service.repository.ProdutoRepository;
 import com.projeto.produto_service.service.ProdutoService;
@@ -101,7 +102,7 @@ class ProdutoServiceTest {
 		String idInexistente = "asdasdasdsadsds";
 		when(produtoRepository.findById(idInexistente)).thenReturn(Optional.empty());
 
-		RuntimeException exception = assertThrows(RuntimeException.class, 
+		ProdutoNotFoundException exception = assertThrows(ProdutoNotFoundException.class, 
 			() -> produtoService.findById(idInexistente));
 		assertEquals("Produto não encontrado.", exception.getMessage());
     	verify(produtoRepository, times(1)).findById(idInexistente);
@@ -130,7 +131,7 @@ class ProdutoServiceTest {
 
 		when(produtoRepository.findById(id)).thenReturn(Optional.of(produto));
 
-		RuntimeException exception = assertThrows(RuntimeException.class, 
+		ProdutoNotFoundException exception = assertThrows(ProdutoNotFoundException.class, 
 			() -> produtoService.updateProduto(id, updateDto));
 		assertEquals("O preço não pode ser negativo.", exception.getMessage());
 		assertEquals(new BigDecimal(90), produto.getPreco());

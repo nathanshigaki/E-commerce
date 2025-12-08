@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import com.projeto.produto_service.dto.ProdutoRequest;
 import com.projeto.produto_service.dto.ProdutoResponse;
 import com.projeto.produto_service.dto.ProdutoUpdateDto;
+import com.projeto.produto_service.exception.ProdutoNotFoundException;
 import com.projeto.produto_service.model.Produto;
 import com.projeto.produto_service.repository.ProdutoRepository;
 
@@ -35,7 +36,7 @@ public class ProdutoService {
     public ProdutoResponse findById(String id){
         return produtoRepository.findById(id)
                 .map(ProdutoResponse::fromProduto)
-                .orElseThrow(() -> new RuntimeException("Produto não encontrado."));
+                .orElseThrow(() -> new ProdutoNotFoundException("Produto não encontrado."));
     }
 
     public ProdutoResponse updateProduto(String id, ProdutoUpdateDto updateDto){
