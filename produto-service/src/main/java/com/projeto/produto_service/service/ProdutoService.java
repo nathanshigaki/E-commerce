@@ -5,7 +5,8 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.projeto.produto_service.dto.ProdutoDto;
+import com.projeto.produto_service.dto.ProdutoRequest;
+import com.projeto.produto_service.dto.ProdutoResponse;
 import com.projeto.produto_service.dto.ProdutoUpdateDto;
 import com.projeto.produto_service.model.Produto;
 import com.projeto.produto_service.repository.ProdutoRepository;
@@ -18,52 +19,56 @@ public class ProdutoService {
 
     private final ProdutoRepository produtoRepository;
 
-    public Produto createProduto(ProdutoDto produtoDto){
+    public ProdutoResponse createProduto(ProdutoRequest produtoRequest){
 
-        if (produtoDto.nome() == null){
+        if (produtoRequest.nome() == null){
             throw new IllegalArgumentException("O produto deve ter um nome");
         } 
         
-        if (produtoDto.preco() == null || produtoDto.preco().compareTo(BigDecimal.ZERO)<0) {
+        if (produtoRequest.preco() == null || produtoRequest.preco().compareTo(BigDecimal.ZERO)<0) {
             throw new IllegalArgumentException("O preço não pode ser nulo ou negativo.");
         }
 
-        Produto produto = Produto.builder()
-                .nome(produtoDto.nome())
-                .descricao(produtoDto.descricao())
-                .preco(produtoDto.preco())
-                .build();
-        
-        return produtoRepository.save(produto);
+        Produto produtoSalvar = produtoRequest.toProduto();
+        Produto produtoSalvo = produtoRepository.save(produtoSalvar);
+        return ProdutoResponse.fromProduto(produtoSalvo);
     }
 
-    public List<Produto> getAllProdutos(){
-        return produtoRepository.findAll();
+    public List<ProdutoResponse> getAllProdutos(){
+        return produtoRepository.findAll()
+                .stream()
+                .map(ProdutoResponse::fromProduto)
+                .toList();
     }
 
-    public Produto findById(String id){
-        return produtoRepository.findById(id).orElseThrow(() -> new RuntimeException("Produto não encontrado."));
+    public ProdutoResponse findById(String id){
+        return produtoRepository.findById(id)
+                .map(ProdutoResponse::fromProduto)
+                .orElseThrow(() -> new RuntimeException("Produto não encontrado."));
     }
 
-    public Produto updateProduto(String id, ProdutoUpdateDto updateDto){
-        Produto produtoExistente = findById(id);
+    public ProdutoResponse updateProduto(String id, ProdutoUpdateDto updateDto){
+        ProdutoResponse produtoExiste = findById(id);
+        Produto produtoUpdate = ProdutoResponse.fromResponse(produtoExiste);
 
-        if (updateDto.getNome() != null) produtoExistente.setNome(updateDto.getNome());
-        if (updateDto.getDescricao() != null) produtoExistente.setDescricao(updateDto.getDescricao());
+        if (updateDto.getNome() != null) produtoUpdate.setNome(updateDto.getNome());
+        if (updateDto.getDescricao() != null) produtoUpdate.setDescricao(updateDto.getDescricao());
         
         if (updateDto.getPreco() != null) {
             if (updateDto.getPreco().compareTo(BigDecimal.ZERO) > 0) {
-                produtoExistente.setPreco(updateDto.getPreco());
+                produtoUpdate.setPreco(updateDto.getPreco());
             } else {
                 throw new IllegalArgumentException("O preço não pode ser negativo.");
             }
         }
 
-        return produtoRepository.save(produtoExistente);
+        Produto produtoSalvo = produtoRepository.save(produtoUpdate);
+        return ProdutoResponse.fromProduto(produtoSalvo);
     }
 
     public void deleteProduto(String id){
-        Produto apagarProduto = findById(id);
+        ProdutoResponse produtoExiste = findById(id);
+        Produto apagarProduto = ProdutoResponse.fromResponse(produtoExiste);        
         produtoRepository.delete(apagarProduto);
     }
 }

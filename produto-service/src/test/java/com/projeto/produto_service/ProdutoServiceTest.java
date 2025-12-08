@@ -19,7 +19,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.projeto.produto_service.dto.ProdutoDto;
+import com.projeto.produto_service.dto.ProdutoRequest;
+import com.projeto.produto_service.dto.ProdutoResponse;
 import com.projeto.produto_service.dto.ProdutoUpdateDto;
 import com.projeto.produto_service.model.Produto;
 import com.projeto.produto_service.repository.ProdutoRepository;
@@ -35,7 +36,7 @@ class ProdutoServiceTest {
 	private ProdutoRepository produtoRepository;
 
 	private Produto produto;
-	private ProdutoDto produtoDto;
+	private ProdutoRequest produtoRequest;
 	private ProdutoUpdateDto updateDto;
 
 	@BeforeEach
@@ -47,8 +48,7 @@ class ProdutoServiceTest {
 				.preco(new BigDecimal("90"))
 				.build();
 		
-		produtoDto = new ProdutoDto(
-			produto.getId(),
+		produtoRequest = new ProdutoRequest(
 			produto.getNome(),
 			produto.getDescricao(),
 			produto.getPreco()
@@ -61,19 +61,18 @@ class ProdutoServiceTest {
 	void testCreateProduto_Success(){
 		when(produtoRepository.save(any(Produto.class))).thenReturn(produto);
 
-		Produto resultado = produtoService.createProduto(produtoDto);
+		ProdutoResponse resultado = produtoService.createProduto(produtoRequest);
 
-		assertEquals("a12bc3", resultado.getId());
-		assertEquals("Garrafa", resultado.getNome());
-		assertEquals("Garrafa cinza de 500ml", resultado.getDescricao());
-		assertEquals(new BigDecimal("90"), resultado.getPreco());
+		assertEquals("a12bc3", resultado.id());
+		assertEquals("Garrafa", resultado.nome());
+		assertEquals("Garrafa cinza de 500ml", resultado.descricao());
+		assertEquals(new BigDecimal("90"), resultado.preco());
 		verify(produtoRepository, times(1)).save(any(Produto.class));
 	}
-
+ 
 	@Test
 	void testCreateProduto_Fail(){
-		ProdutoDto produtoInvalido = new ProdutoDto(
-			"id_teste",
+		ProdutoRequest produtoInvalido = new ProdutoRequest(
 			"Nome Teste",
 			"Descricao Teste",
 			new BigDecimal("-50.00")
@@ -85,15 +84,16 @@ class ProdutoServiceTest {
 
 	@Test
 	void testFindById_Success(){
-		when(produtoRepository.findById(produtoDto.id())).thenReturn(Optional.of(produto));
+		String id = "a12bc3";
+		when(produtoRepository.findById(id)).thenReturn(Optional.of(produto));
 
-		Produto produtoExistente = produtoService.findById(produtoDto.id());
+		ProdutoResponse produtoExistente = produtoService.findById(id);
 
 		assertNotNull(produtoExistente);
-		assertEquals("a12bc3", produtoExistente.getId());
-		assertEquals("Garrafa", produtoExistente.getNome());
-		assertEquals(new BigDecimal(90), produtoExistente.getPreco());
-		verify(produtoRepository, times(1)).findById(produtoDto.id());
+		assertEquals("a12bc3", produtoExistente.id());
+		assertEquals("Garrafa", produtoExistente.nome());
+		assertEquals(new BigDecimal(90), produtoExistente.preco());
+		verify(produtoRepository, times(1)).findById(id);
 	}
 
 	@Test
@@ -109,27 +109,29 @@ class ProdutoServiceTest {
 
 	@Test
 	void testUpdateProduto_Success(){
+		String id = "a12bc3";
 		updateDto.setPreco(new BigDecimal(200));
 
-		when(produtoRepository.findById(produtoDto.id())).thenReturn(Optional.of(produto));
+		when(produtoRepository.findById(id)).thenReturn(Optional.of(produto));
 		when(produtoRepository.save(any(Produto.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-		Produto resultado = produtoService.updateProduto(produtoDto.id(), updateDto);
+		ProdutoResponse resultado = produtoService.updateProduto(id, updateDto);
 
-		assertEquals(new BigDecimal(200), resultado.getPreco());
-		assertEquals("Garrafa", resultado.getNome());
-		assertEquals("Garrafa cinza de 500ml", resultado.getDescricao());
+		assertEquals(new BigDecimal(200), resultado.preco());
+		assertEquals("Garrafa", resultado.nome());
+		assertEquals("Garrafa cinza de 500ml", resultado.descricao());
 		verify(produtoRepository, times(1)).save(any(Produto.class));
 	}
 
 	@Test
 	void testUpdateProduto_Fail(){
+		String id = "a12bc3";
 		updateDto.setPreco(new BigDecimal(-50));
 
-		when(produtoRepository.findById(produtoDto.id())).thenReturn(Optional.of(produto));
+		when(produtoRepository.findById(id)).thenReturn(Optional.of(produto));
 
 		RuntimeException exception = assertThrows(RuntimeException.class, 
-			() -> produtoService.updateProduto(produtoDto.id(), updateDto));
+			() -> produtoService.updateProduto(id, updateDto));
 		assertEquals("O preço não pode ser negativo.", exception.getMessage());
 		assertEquals(new BigDecimal(90), produto.getPreco());
 		verify(produtoRepository, times(0)).save(any(Produto.class));
@@ -137,10 +139,10 @@ class ProdutoServiceTest {
 
 	@Test
 	void testDeleteProduto_Success(){
-		when(produtoRepository.findById(produtoDto.id())).thenReturn(Optional.of(produto));
+		when(produtoRepository.findById(produto.getId())).thenReturn(Optional.of(produto));
 
-		produtoService.deleteProduto(produtoDto.id());
-		verify(produtoRepository, times(1)).findById(produtoDto.id());
+		produtoService.deleteProduto(produto.getId());
+		verify(produtoRepository, times(1)).findById(produto.getId());
 		verify(produtoRepository, times(1)).delete(produto);
 	}
 
@@ -156,4 +158,5 @@ class ProdutoServiceTest {
 		assertEquals("Produto não encontrado.", exception.getMessage());
 		verify(produtoRepository, never()).delete(any());
 	}
+
 }
