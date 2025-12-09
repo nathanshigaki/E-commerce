@@ -10,6 +10,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -79,8 +80,46 @@ class ProdutoServiceTest {
 			new BigDecimal("-50.00")
     	);
 
-		assertThrows(IllegalArgumentException.class, () -> produtoService.createProduto(produtoInvalido));
+		IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, 
+			() -> produtoService.createProduto(produtoInvalido));
+		assertEquals("O preço deve ser maior que zero.", exception.getMessage());
 		verify(produtoRepository, never()).save(any());
+	}
+
+	@Test
+	void testGetAllProduto(){
+		Produto p1 = Produto.builder()
+                .id("1")
+                .nome("Produto A")
+                .descricao("Descrição A")
+                .preco(new BigDecimal("10.00"))
+                .build();
+
+        Produto p2 = Produto.builder()
+                .id("2")
+                .nome("Produto B")
+                .descricao("Descrição B")
+                .preco(new BigDecimal("20.00"))
+                .build();
+
+		List<Produto> listaProdutos = List.of(p1, p2);
+
+		when(produtoRepository.findAll()).thenReturn(listaProdutos);
+
+		List<ProdutoResponse> resultado = produtoService.getAllProdutos();
+
+		assertNotNull(resultado);
+        assertEquals(2, resultado.size());
+
+		assertEquals("1", resultado.get(0).id());
+        assertEquals("Produto A", resultado.get(0).nome());
+        assertEquals(new BigDecimal("10.00"), resultado.get(0).preco());
+
+		assertEquals("2", resultado.get(1).id());
+        assertEquals("Produto B", resultado.get(1).nome());
+		assertEquals(new BigDecimal("20.00"), resultado.get(1).preco());
+
+		verify(produtoRepository, times(1)).findAll();
 	}
 
 	@Test
@@ -131,9 +170,9 @@ class ProdutoServiceTest {
 
 		when(produtoRepository.findById(id)).thenReturn(Optional.of(produto));
 
-		ProdutoNotFoundException exception = assertThrows(ProdutoNotFoundException.class, 
+		IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, 
 			() -> produtoService.updateProduto(id, updateDto));
-		assertEquals("O preço não pode ser negativo.", exception.getMessage());
+		assertEquals("O preço deve ser maior que zero.", exception.getMessage());
 		assertEquals(new BigDecimal(90), produto.getPreco());
 		verify(produtoRepository, times(0)).save(any(Produto.class));
 	}

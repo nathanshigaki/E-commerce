@@ -2,123 +2,140 @@ package com.projeto.pedido_service;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import io.restassured.response.Response;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.context.annotation.Import;
 
-import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.*;
+import com.projeto.pedido_service.dto.PedidoRequest;
+import com.projeto.pedido_service.model.Pedido;
+import com.projeto.pedido_service.repository.PedidoRepository;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Optional;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@Import(TestcontainersConfiguration.class)
 class PedidoControllerTests {
     
     @LocalServerPort
     private Integer port;
 
+    @Autowired
+    private PedidoRepository pedidoRepository;
+
     @BeforeEach
     void setup() {
         RestAssured.baseURI = "http://localhost";
         RestAssured.port = port;
+
+        pedidoRepository.deleteAll();
     }
 
     @Test
-    void shouldSubmitPedido() {
-        String submitOrderJson = """
-                {
-                    "skucode": "notebook_nitro_v15",
-                    "preco": "4824.99",
-                    "quantidade": 1
-                }
-                """;
+    void shouldCreatePedido() {
+        PedidoRequest pedidoRequest = getPedidoRequest();
 
-        given()
+        Response response = RestAssured.given()
             .contentType("application/json")
-            .body(submitOrderJson)
+            .body(pedidoRequest)
             .when()
             .post("api/pedido")
             .then()
             .log().all()
-            .statusCode(201)
-            .body("id", notNullValue())
-            .body("skucode", equalTo("notebook_nitro_v15"));
+            .extract().response();
+        
+        assertEquals(201, response.statusCode());
+		assertEquals(pedidoRequest.skucode(), response.jsonPath().getString("skucode"));
+
+		BigDecimal precoRetornado = response.jsonPath().getObject("preco", BigDecimal.class);
+		assertEquals(0, pedidoRequest.preco().compareTo(precoRetornado));
+        assertEquals(pedidoRequest.quantidade(), response.jsonPath().getInt("quantidade"));
+
+		assertEquals(1, pedidoRepository.count());
+        
+        Pedido produtoSalvo = pedidoRepository.findAll().get(0);
+        assertEquals(pedidoRequest.skucode(), produtoSalvo.getSkucode());
+    }
+
+    @Test
+    void shouldGetAllPedido(){
+        Pedido p1 = getPedido("Pedido 1", "SKU111", new BigDecimal(100), 1);
+        Pedido p2 = getPedido("Pedido 2", "SKU222", new BigDecimal(200), 2);
+
+        pedidoRepository.saveAll(List.of(p1, p2));
+
+        Response response = RestAssured.given()
+			.contentType(ContentType.JSON)
+			.when()
+			.get("api/pedido") 
+			.then()
+			.log().all() 
+			.extract().response();
+
+		assertEquals(200, response.statusCode());
+		assertEquals(2, response.jsonPath().getList("$").size());
+		assertEquals("Pedido 1", response.jsonPath().getString("[0].numeroPedido"));
+    	assertEquals("Pedido 2", response.jsonPath().getString("[1].numeroPedido"));
     }
 
     @Test
     void shouldFindPedidoById(){
-        Long pedidoId = createOrderAndGetId("SKU-FIND-ME", "50.00");
+        Pedido pedido = getPedido("Pedido 1", "SKU111", new BigDecimal(100), 1);
+        pedido = pedidoRepository.save(pedido);
+        Long id = pedido.getId();
 
-        given()
+        Response response = RestAssured.given()
+            .contentType(ContentType.JSON)
             .when()
-            .get("api/pedido/" + pedidoId)
+            .get("api/pedido/" + id)
             .then()
             .log().all()
-            .statusCode(200)
-            .body("id", equalTo(pedidoId.intValue()))
-            .body("skucode", equalTo("SKU-FIND-ME"));
-    }
+            .extract().response();
+        
+        assertEquals(200, response.statusCode());
+		assertEquals(id, response.jsonPath().getLong("id"));
+		assertEquals(pedido.getNumeroPedido(), response.jsonPath().getString("numeroPedido"));
+        assertEquals(pedido.getSkucode(), response.jsonPath().getString("skucode"));
 
-    @Test
-    void shouldReturnAllPedidos(){
-        createOrderAndGetId("SKU-LIST-1", "10.00");
-        createOrderAndGetId("SKU-LIST-2", "20.00");
+		BigDecimal precoRetornado = response.jsonPath().getObject("preco", BigDecimal.class);
+		assertEquals(0, pedido.getPreco().compareTo(precoRetornado));
 
-        given()
-        .when()
-        .get("api/pedido")
-        .then()
-        .log().all()
-        .statusCode(200)
-        .body("skucode", hasItems("SKU-LIST-1", "SKU-LIST-2"));
+        assertEquals(pedido.getQuantidade(), response.jsonPath().getInt("quantidade"));
     }
 
     @Test
     void shouldDeletePedido(){
-        Long pedidoId = createOrderAndGetId("SKU-DELETE-ME", "5.00");
+        Pedido pedido = getPedido("Pedido 1", "SKU111", new BigDecimal(100), 1);
+        pedido = pedidoRepository.save(pedido);
 
-        given()
+        RestAssured.given()
+            .contentType(ContentType.JSON)
             .when()
-            .delete("api/pedido/" + pedidoId)
-            .then()
-            .log().all()
-            .statusCode(204);
+            .delete("api/pedido/{id}", pedido.getId());
 
-        given()
-            .when()
-            .get("/pedidos/" + pedidoId)
-            .then()
-            .log().all()
-            .statusCode(404);
+        Optional<Pedido> busca = pedidoRepository.findById(pedido.getId());
+        assertFalse(busca.isPresent());
     }
 
-    @Test
-    void shouldReturn404ForNonExistentPedido(){
-        given()
-        .when()
-            .get("/pedidos/999999") 
-        .then()
-            .log().all()
-            .statusCode(404);
+    private PedidoRequest getPedidoRequest(){
+        return new PedidoRequest("SKU-123", new BigDecimal(65), 1);
     }
 
-    private Long createOrderAndGetId(String skucode, String preco) {
-        String json = String.format("""
-                {
-                  "skucode": "%s",
-                  "preco": "%s",
-                  "quantidade": 1
-                }
-                """, skucode, preco);
-
-        return given()
-                .contentType(ContentType.JSON)
-                .body(json)
-                .when()
-                .post("api/pedido")
-                .then()
-                .statusCode(201)
-                .extract()
-                .jsonPath().getLong("id");
+    private Pedido getPedido(String numeroPedido, String skucode, BigDecimal preco, int quantidade ){
+        Pedido pedido = new Pedido();
+        pedido.setNumeroPedido(numeroPedido);
+        pedido.setSkucode(skucode);
+        pedido.setPreco(preco);
+        pedido.setQuantidade(quantidade);
+        return pedido;
     }
 }

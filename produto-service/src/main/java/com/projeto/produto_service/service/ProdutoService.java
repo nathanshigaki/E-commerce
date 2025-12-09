@@ -21,6 +21,10 @@ public class ProdutoService {
     private final ProdutoRepository produtoRepository;
 
     public ProdutoResponse createProduto(ProdutoRequest produtoRequest){
+        if (produtoRequest.preco() == null || produtoRequest.preco().compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("O preço deve ser maior que zero.");
+        }
+        
         Produto produtoSalvar = produtoRequest.toProduto();
         Produto produtoSalvo = produtoRepository.save(produtoSalvar);
         return ProdutoResponse.fromProduto(produtoSalvo);

@@ -1,19 +1,19 @@
 package com.projeto.pedido_service.controller;
 
-import java.net.URI;
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import com.projeto.pedido_service.dto.PedidoDto;
-import com.projeto.pedido_service.model.Pedido;
+import com.projeto.pedido_service.dto.PedidoRequest;
+import com.projeto.pedido_service.dto.PedidoResponse;
 import com.projeto.pedido_service.service.PedidoService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -28,49 +28,23 @@ public class PedidoController {
     private final PedidoService pedidoService;
 
     @PostMapping
-    public ResponseEntity<?> createPedido(@RequestBody PedidoDto pedidoDto) { 
-        try {
-            Pedido novoPedido = pedidoService.createPedido(pedidoDto);
-            URI location = ServletUriComponentsBuilder
-                    .fromCurrentRequest() 
-                    .path("/{id}") 
-                    .buildAndExpand(novoPedido.getId()) 
-                    .toUri();
-
-            return ResponseEntity.created(location).body(novoPedido);
-
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    public ResponseEntity<PedidoResponse> createPedido(@RequestBody @Valid PedidoRequest pedidoRequest) { 
+        return ResponseEntity.status(HttpStatus.CREATED).body(pedidoService.createPedido(pedidoRequest));
     }
 
     @GetMapping
-    public ResponseEntity<List<Pedido>> getAllPedidos(){
-        List<Pedido> pedidos = pedidoService.getAllPedidos();
-        if (pedidos.isEmpty()){
-            return ResponseEntity.noContent().build();
-        }
-
-        return ResponseEntity.ok(pedidos);
+    public ResponseEntity<List<PedidoResponse>> getAllPedidos(){
+        return ResponseEntity.ok(pedidoService.getAllPedidos());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Pedido> findById(@PathVariable Long id){
-        try {
-            Pedido existePedido = pedidoService.findById(id);
-            return ResponseEntity.ok(existePedido);
-        } catch (Exception e) {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<PedidoResponse> findById(@PathVariable Long id){
+        return ResponseEntity.ok(pedidoService.findById(id));
     }
     
     @DeleteMapping("/{id}")
-    public ResponseEntity<Pedido> deletePedido(@PathVariable Long id){
-        try {
-            pedidoService.deletePedido(id);
-            return ResponseEntity.noContent().build();
-        } catch (Exception e) {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<PedidoResponse> deletePedido(@PathVariable Long id){
+        pedidoService.deletePedido(id);
+        return ResponseEntity.noContent().build();
     }
 }

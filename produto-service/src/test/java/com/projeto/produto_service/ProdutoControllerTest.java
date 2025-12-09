@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -70,26 +69,28 @@ class ProdutoControllerTest {
 
 	@Test
 	void shouldGetAllProduto(){
-		Produto p1 = Produto.builder().nome("Teclado").descricao("Teclado mecanico").preco(new BigDecimal(300)).build();
-		Produto p2 = Produto.builder().nome("Mouse").descricao("Logitech").preco(new BigDecimal(120)).build();
+		Produto p1 = getProduto("Teclado", "Teclado mecanico", new BigDecimal(300));
+		Produto p2 = getProduto("Mouse", "Logitech", new BigDecimal(120));
 
 		produtoRepository.saveAll(List.of(p1, p2));
 
-		RestAssured.given()
+		Response response = RestAssured.given()
 			.contentType(ContentType.JSON)
 			.when()
 			.get("api/produto") 
 			.then()
 			.log().all() 
-			.statusCode(200) 
-			.body("size()", Matchers.is(2)) 
-			.body("[0].nome", Matchers.equalTo("Teclado"))
-			.body("[1].nome", Matchers.equalTo("Mouse"));
+			.extract().response();
+
+		assertEquals(200, response.statusCode());
+		assertEquals(2, response.jsonPath().getList("$").size());
+		assertEquals("Teclado", response.jsonPath().getString("[0].nome"));
+    	assertEquals("Mouse", response.jsonPath().getString("[1].nome"));
 	}
 
 	@Test
 	void shouldFindById(){
-		Produto produto = Produto.builder().nome("Monitor").descricao("240hz").preco(new BigDecimal(420)).build();
+		Produto produto = getProduto("Monitor", "240hz", new BigDecimal(420));
 		produto = produtoRepository.save(produto);
 		String id = produto.getId();
 
@@ -111,7 +112,7 @@ class ProdutoControllerTest {
 
 	@Test
 	void shouldUpdateProduto(){
-		Produto produto = Produto.builder().nome("Cadeira").descricao("Simples").preco(new BigDecimal(420)).build();
+		Produto produto = getProduto("Cadeira", "Simples", new BigDecimal(420));
 		produto = produtoRepository.save(produto);
 
 		ProdutoUpdateDto updateDto = new ProdutoUpdateDto();
@@ -136,7 +137,7 @@ class ProdutoControllerTest {
 
 	@Test
 	void shouldDeleteProduto(){
-		Produto produto = Produto.builder().nome("Mesa").descricao("Simples").preco(new BigDecimal(230)).build();
+		Produto produto = getProduto("Mesa", "Simples", new BigDecimal(230));
 		produto = produtoRepository.save(produto);
 
 		RestAssured.given()
@@ -150,7 +151,11 @@ class ProdutoControllerTest {
         assertFalse(busca.isPresent());
 	}
 
-	public ProdutoRequest getProdutoRequest(){
+	private ProdutoRequest getProdutoRequest(){
 		return new ProdutoRequest("Caneta", "Caneta azul", new BigDecimal(4));
+	}
+
+	private Produto getProduto(String nome, String descricao, BigDecimal preco){
+		return Produto.builder().nome(nome).descricao(descricao).preco(preco).build();
 	}
 }

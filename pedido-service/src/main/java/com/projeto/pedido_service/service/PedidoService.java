@@ -6,7 +6,9 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
-import com.projeto.pedido_service.dto.PedidoDto;
+import com.projeto.pedido_service.dto.PedidoRequest;
+import com.projeto.pedido_service.dto.PedidoResponse;
+import com.projeto.pedido_service.exception.PedidoNotFoundException;
 import com.projeto.pedido_service.model.Pedido;
 import com.projeto.pedido_service.repository.PedidoRepository;
 
@@ -20,42 +22,37 @@ public class PedidoService {
     private final PedidoRepository pedidoRepository;
 
     @Transactional
-    public Pedido createPedido(PedidoDto pedidoDto){
-
-        if (pedidoDto.preco() == null || pedidoDto.preco().compareTo(BigDecimal.ZERO) < 0) {
-            throw new IllegalArgumentException("O preço não pode ser nulo ou negativo.");
-        }
-        
-        if (pedidoDto.quantidade() == null || pedidoDto.quantidade() < 0) {
-            throw new IllegalArgumentException("A quantidade deve ser maior que zero.");
+    public PedidoResponse createPedido(PedidoRequest pedidoRequest){
+        if (pedidoRequest.preco() == null || pedidoRequest.preco().compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("O preço deve ser maior que zero.");
         }
 
-        if (pedidoDto.skucode() == null || pedidoDto.skucode().isBlank()) {
-            throw new IllegalArgumentException("O skucode não pode ser nulo ou vazio.");
-        }
+        Pedido pedidoSalvar = pedidoRequest.toPedido();
+        pedidoSalvar.setNumeroPedido(UUID.randomUUID().toString());
+        Pedido pedidoSalvo = pedidoRepository.save(pedidoSalvar);
 
-        Pedido pedido = new Pedido();
-        pedido.setNumeroPedido(UUID.randomUUID().toString());
-        pedido.setPreco(pedidoDto.preco());
-        pedido.setSkucode(pedidoDto.skucode());
-        pedido.setQuantidade(pedidoDto.quantidade());
-
-        return pedidoRepository.save(pedido);
+        return PedidoResponse.fromPedido(pedidoSalvo);
     }
 
     @Transactional
-    public List<Pedido> getAllPedidos(){
-        return pedidoRepository.findAll();
+    public List<PedidoResponse> getAllPedidos(){
+        return pedidoRepository.findAll()
+                .stream()
+                .map(PedidoResponse::fromPedido)
+                .toList();
     }
 
     @Transactional
-    public Pedido findById(Long id) {
-        return pedidoRepository.findById(id).orElseThrow(() -> new RuntimeException("Pedido não encontrado"));
+    public PedidoResponse findById(Long id) {
+        return pedidoRepository.findById(id)
+                .map(PedidoResponse::fromPedido)
+                .orElseThrow(() -> new PedidoNotFoundException("Pedido não encontrado."));
     }
 
     @Transactional
     public void deletePedido(Long id) {
-        Pedido apagarPedido = findById(id);
+        PedidoResponse pedidoExiste = findById(id);
+        Pedido apagarPedido = PedidoResponse.fromResponse(pedidoExiste);
         pedidoRepository.delete(apagarPedido);
     }
 }
