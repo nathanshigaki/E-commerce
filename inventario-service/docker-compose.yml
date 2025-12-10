@@ -1,11 +1,11 @@
 services:
     mysql:
         image: mysql:8.4.7
-        container_name: mysql-pedido
+        container_name: mysql-inventario
         environment:
             MYSQL_ROOT_PASSWORD: root
         ports:
-            - "3308:3306"
+            - "3306:3306"
         volumes:
             - ./mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
             - ./docker/mysql/data:/var/lib/mysql
