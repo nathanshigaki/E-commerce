@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
+import com.projeto.pedido_service.Client.InventarioClient;
 import com.projeto.pedido_service.dto.PedidoRequest;
 import com.projeto.pedido_service.dto.PedidoResponse;
 import com.projeto.pedido_service.exception.PedidoNotFoundException;
@@ -17,14 +18,22 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class PedidoService {
 
     private final PedidoRepository pedidoRepository;
+    private final InventarioClient inventarioClient;
 
     @Transactional
     public PedidoResponse createPedido(PedidoRequest pedidoRequest){
+        boolean isProdutoInStock = inventarioClient.isInStock(pedidoRequest.skucode(), pedidoRequest.quantidade());
+
         if (pedidoRequest.preco() == null || pedidoRequest.preco().compareTo(BigDecimal.ZERO) < 0) {
             throw new IllegalArgumentException("O preço deve ser maior que zero.");
+        }
+
+        if (!isProdutoInStock){
+            throw new IllegalArgumentException("Produto com skucode: "+ pedidoRequest.skucode() + " não tem no estoque.");
         }
 
         Pedido pedidoSalvar = pedidoRequest.toPedido();

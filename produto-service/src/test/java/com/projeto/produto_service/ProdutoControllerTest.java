@@ -12,7 +12,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.context.annotation.Import;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.testcontainers.containers.MongoDBContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.projeto.produto_service.dto.ProdutoRequest;
 import com.projeto.produto_service.dto.ProdutoUpdateDto;
@@ -23,9 +26,13 @@ import io.restassured.response.Response;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 
+@Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Import(TestcontainersConfiguration.class)
 class ProdutoControllerTest {
+
+	@Container
+	@ServiceConnection
+	static MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:8.0");
 
 	@LocalServerPort
     private Integer port;
@@ -66,7 +73,6 @@ class ProdutoControllerTest {
         Produto produtoSalvo = produtoRepository.findAll().get(0);
         assertEquals(produtoRequest.nome(), produtoSalvo.getNome());
 	}
-
 	@Test
 	void shouldGetAllProduto(){
 		Produto p1 = getProduto("Teclado", "Teclado mecanico", new BigDecimal(300));

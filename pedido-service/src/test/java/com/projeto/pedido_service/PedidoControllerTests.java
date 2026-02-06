@@ -9,8 +9,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.context.annotation.Import;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
+import org.testcontainers.containers.MySQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
+import com.projeto.pedido_service.Stub.InventarioClientStub;
 import com.projeto.pedido_service.dto.PedidoRequest;
 import com.projeto.pedido_service.model.Pedido;
 import com.projeto.pedido_service.repository.PedidoRepository;
@@ -22,10 +27,15 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
+@Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Import(TestcontainersConfiguration.class)
+@AutoConfigureWireMock(port = 0)
 class PedidoControllerTests {
-    
+
+    @Container
+    @ServiceConnection
+	static MySQLContainer<?> mySQLContainer = new MySQLContainer<>("mysql:8.4.7");
+
     @LocalServerPort
     private Integer port;
 
@@ -43,6 +53,8 @@ class PedidoControllerTests {
     @Test
     void shouldCreatePedido() {
         PedidoRequest pedidoRequest = getPedidoRequest();
+
+        InventarioClientStub.stubInventoryCall("SKU-123", 1);
 
         Response response = RestAssured.given()
             .contentType("application/json")

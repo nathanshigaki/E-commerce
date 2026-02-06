@@ -20,6 +20,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.projeto.pedido_service.Client.InventarioClient;
 import com.projeto.pedido_service.dto.PedidoRequest;
 import com.projeto.pedido_service.dto.PedidoResponse;
 import com.projeto.pedido_service.exception.PedidoNotFoundException;
@@ -32,6 +33,9 @@ class PedidoServiceTest {
 
     @InjectMocks
     private PedidoService pedidoService;
+
+    @Mock
+    private InventarioClient inventarioClient;
 
     @Mock
     private PedidoRepository pedidoRepository;
@@ -58,24 +62,34 @@ class PedidoServiceTest {
 
     @Test
     void testCreatePedido_Success(){
+        when(inventarioClient.isInStock(pedidoRequest.skucode(), pedidoRequest.quantidade())).thenReturn(true);
         when(pedidoRepository.save(any(Pedido.class))).thenReturn(pedido);
 
         PedidoResponse resultado = pedidoService.createPedido(pedidoRequest);
 
+        assertNotNull(resultado);
         assertEquals(1L, resultado.id());
         assertEquals("SKU123", resultado.skucode());
         assertEquals(new BigDecimal(140), resultado.preco());
         assertEquals(2, resultado.quantidade());
+        verify(inventarioClient, times(1)).isInStock(any(), any());
         verify(pedidoRepository, times(1)).save(any(Pedido.class));
     }
 
     @Test
-    void testCreatePedido_Fail(){
-        PedidoRequest pedidoInvalido = new PedidoRequest(
-            "SKU456", 
-            new BigDecimal("-50.00"), 
-            1
-        );
+    void testCreatePedido_Fail_SemEstoque(){
+        when(inventarioClient.isInStock(any(), any())).thenReturn(false);
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, 
+            () -> pedidoService.createPedido(pedidoRequest));
+        
+        assertEquals("Produto com skucode: SKU123 não tem no estoque.", exception.getMessage());
+        verify(pedidoRepository, never()).save(any());
+    }
+
+    @Test
+    void testCreatePedido_Fail_PrecoInvalido(){
+        PedidoRequest pedidoInvalido = new PedidoRequest("SKU456", new BigDecimal("-50.00"), 1);
 
         assertThrows(IllegalArgumentException.class, 
             () -> pedidoService.createPedido(pedidoInvalido));

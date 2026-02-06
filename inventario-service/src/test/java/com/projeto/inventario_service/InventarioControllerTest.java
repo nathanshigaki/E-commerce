@@ -8,16 +8,23 @@ import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.context.annotation.Import;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.testcontainers.containers.MySQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.projeto.inventario_service.Repository.InventarioRepository;
 import com.projeto.inventario_service.model.Inventario;
 
 import io.restassured.RestAssured;
 
+@Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Import(TestcontainersConfiguration.class)
 class InventarioControllerTest {
+
+    @Container
+    @ServiceConnection
+    static MySQLContainer<?> mysqlContainer = new MySQLContainer<>("mysql:8.4.7");
 
 	@LocalServerPort
     private Integer port;
