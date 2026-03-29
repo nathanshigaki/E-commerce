@@ -20,7 +20,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.projeto.pedido_service.Client.InventarioClient;
+import com.projeto.pedido_service.client.InventarioClient;
 import com.projeto.pedido_service.dto.PedidoRequest;
 import com.projeto.pedido_service.dto.PedidoResponse;
 import com.projeto.pedido_service.exception.PedidoNotFoundException;

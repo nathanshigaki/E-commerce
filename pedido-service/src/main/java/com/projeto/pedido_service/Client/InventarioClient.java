@@ -1,4 +1,4 @@
-package com.projeto.pedido_service.Client;
+package com.projeto.pedido_service.client;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.RequestMapping;
