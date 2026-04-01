@@ -3,6 +3,7 @@ package com.projeto.api_gateway.rotas;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.servlet.function.RequestPredicates;
 import org.springframework.web.servlet.function.RouterFunction;
 import org.springframework.web.servlet.function.ServerResponse;
 
@@ -22,7 +23,7 @@ public class Rotas {
     @Bean
     public RouterFunction<ServerResponse> produtoServiceRota(){
         return route("produto_service")
-            .GET("/api/produto/**", http())
+            .route(RequestPredicates.path("/api/produto/**"), http()) 
             .before(uri("http://localhost:8080"))
             .filter(CircuitBreakerFilterFunctions.circuitBreaker("produtoServiceCircuitBreaker", URI.create("forward:/fallbackRoute")))         
             .build();
@@ -31,7 +32,7 @@ public class Rotas {
     @Bean
     public RouterFunction<ServerResponse> produtoServiceSwaggerRota(){
         return route("produto_service_swagger")
-            .GET("/aggregate/product-service/v3/api-docs", http())
+            .route(RequestPredicates.path("/aggregate/product-service/v3/api-docs"), http()) 
             .before(uri("http://localhost:8080"))
             .filter(CircuitBreakerFilterFunctions.circuitBreaker("produtoServiceSwaggerCircuitBreaker", URI.create("forward:/fallbackRoute"))) // CORREÇÃO AQUI
             .before(setPath("/api-docs"))                
@@ -41,7 +42,7 @@ public class Rotas {
     @Bean
     public RouterFunction<ServerResponse> pedidoServiceRota(){
         return route("pedido_service")
-            .GET("/api/pedido/**", http())
+            .route(RequestPredicates.path("/api/pedido/**"), http()) 
             .before(uri("http://localhost:8081"))
             .filter(CircuitBreakerFilterFunctions.circuitBreaker("pedidoServiceCircuitBreaker", URI.create("forward:/fallbackRoute"))) // CORREÇÃO AQUI                
             .build();
@@ -50,7 +51,7 @@ public class Rotas {
     @Bean
     public RouterFunction<ServerResponse> pedidoServiceSwaggerRota(){
         return route("pedido_service_swagger")
-            .GET("/aggregate/pedido-service/v3/api-docs", http())
+            .route(RequestPredicates.path("/aggregate/pedido-service/v3/api-docs"), http()) 
             .before(uri("http://localhost:8081"))
             .filter(CircuitBreakerFilterFunctions.circuitBreaker("pedidoServiceSwaggerCircuitBreaker", URI.create("forward:/fallbackRoute"))) // CORREÇÃO AQUI
             .before(setPath("/api-docs"))                
@@ -60,7 +61,7 @@ public class Rotas {
     @Bean
     public RouterFunction<ServerResponse> inventarioServiceRota(){
         return route("inventario_service")
-            .GET("/api/inventario/**", http())
+            .route(RequestPredicates.path("/api/inventario/**"), http()) 
             .before(uri("http://localhost:8082")) 
             .filter(CircuitBreakerFilterFunctions.circuitBreaker("inventarioServiceCircuitBreaker", URI.create("forward:/fallbackRoute"))) // CORREÇÃO AQUI               
             .build();
@@ -69,7 +70,7 @@ public class Rotas {
     @Bean
     public RouterFunction<ServerResponse> inventarioServiceSwaggerRota(){
         return route("inventario_service_swagger")
-            .GET("/aggregate/inventario-service/v3/api-docs", http())
+            .route(RequestPredicates.path("/aggregate/inventario-service/v3/api-docs"), http())
             .before(uri("http://localhost:8082"))
             .filter(CircuitBreakerFilterFunctions.circuitBreaker("inventarioServiceSwaggerCircuitBreaker", URI.create("forward:/fallbackRoute"))) // CORREÇÃO AQUI
             .before(setPath("/api-docs"))                

@@ -18,6 +18,7 @@ import lombok.NoArgsConstructor;
 public class Produto {
     @Id
     private String id;
+    private String skucode;
     private String nome;
     private String descricao;
     private BigDecimal preco;

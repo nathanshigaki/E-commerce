@@ -5,11 +5,11 @@
   }
   <form [formGroup]="addProductForm" (ngSubmit)="onSubmit()">
     <div class="mb-4">
-      <label class="block text-gray-700" for="skuCode">SKU Code</label>
+      <label class="block text-gray-700" for="skucode">SKU Code</label>
       <input
         type="text"
-        id="skuCode"
-        formControlName="skuCode"
+        id="skucode"
+        formControlName="skucode"
         class="border rounded w-full py-2 px-3 text-gray-700"
       />
       <div *ngIf="skucode?.invalid && (skucode?.dirty || skucode?.touched)" class="text-red-500">
@@ -23,7 +23,7 @@
       <input
         type="text"
         id="name"
-        formControlName="name"
+        formControlName="nome"
         class="border rounded w-full py-2 px-3 text-gray-700"
       />
       <div *ngIf="nome?.invalid && (nome?.dirty || nome?.touched)" class="text-red-500">
@@ -36,7 +36,7 @@
       <label class="block text-gray-700" for="description">Description</label>
       <textarea
         id="description"
-        formControlName="description"
+        formControlName="descricao"
         class="border rounded w-full py-2 px-3 text-gray-700"
       ></textarea>
       <div *ngIf="descricao?.invalid && (descricao?.dirty || descricao?.touched)" class="text-red-500">
@@ -50,7 +50,7 @@
       <input
         type="number"
         id="price"
-        formControlName="price"
+        formControlName="preco"
         class="border rounded w-full py-2 px-3 text-gray-700"
       />
       <div *ngIf="preco?.invalid && (preco?.dirty || preco?.touched)" class="text-red-500">

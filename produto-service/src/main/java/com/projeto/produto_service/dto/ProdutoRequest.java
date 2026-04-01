@@ -21,6 +21,7 @@ public record ProdutoRequest(
 
     public Produto toProduto() {
         Produto produto = new Produto();
+        produto.setSkucode(this.nome().toLowerCase().trim());
         produto.setNome(this.nome);
         produto.setPreco(this.preco);
         produto.setDescricao(this.descricao);

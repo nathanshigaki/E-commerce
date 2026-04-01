@@ -13,7 +13,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "dist/microservices-shop-frontend",
+            "outputPath": "dist/microservices-frontend",
             "index": "src/index.html",
             "browser": "src/main.ts",
             "polyfills": [
@@ -59,10 +59,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "microservices-shop-frontend:build:production"
+              "buildTarget": "microservices-frontend:build:production"
             },
             "development": {
-              "buildTarget": "microservices-shop-frontend:build:development"
+              "buildTarget": "microservices-frontend:build:development"
             }
           },
           "defaultConfiguration": "development"
