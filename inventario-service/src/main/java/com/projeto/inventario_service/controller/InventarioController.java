@@ -15,10 +15,12 @@ import org.springframework.web.bind.annotation.RestController;
 import com.projeto.inventario_service.Service.InventarioService;
 import com.projeto.inventario_service.dto.InventarioRequest;
 import com.projeto.inventario_service.dto.InventarioResponse;
+import com.projeto.inventario_service.model.Inventario;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 
@@ -38,6 +40,11 @@ public class InventarioController {
     public ResponseEntity<List<InventarioResponse>> getAllInventario() {
         return ResponseEntity.ok(inventarioService.getAllInventarios());
     }
+
+    @GetMapping("/detalhes")
+    public Inventario getDetalhes(@RequestParam String skucode) {
+        return inventarioService.getInventarioBySkucode(skucode);
+    }
     
     @PatchMapping("/{id}")
     public ResponseEntity<InventarioResponse> updateInventario(@PathVariable Long id, @RequestBody @Valid InventarioRequest updateDto) {
@@ -50,8 +57,18 @@ public class InventarioController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping
+    @GetMapping("/check-stock")
     public boolean isInStock(@RequestParam String skucode, Integer quantidade){
         return inventarioService.isInStock(skucode, quantidade);
+    }
+
+    @PutMapping("/decrement")
+    public void decrementStock(@RequestParam String skucode, @RequestParam Integer quantidade) {
+        inventarioService.decrementStock(skucode, quantidade);
+    }
+
+    @PutMapping("/update-quantidade")
+    public void updateQuantidade(@RequestParam String skucode, @RequestParam Integer quantidade) {
+        inventarioService.updateQuantidadeManual(skucode, quantidade);
     }
 }

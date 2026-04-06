@@ -25,26 +25,29 @@ export class HomePageComponent implements OnInit {
   private readonly orderService = inject(OrderService);
   private readonly router = inject(Router);
   isAuthenticated = false;
-  products: Array<Product> = [];
+  products: Array<Product & { quantidade?: number }> = [];
   quantityIsNull = false;
   orderSuccess = false;
   orderFailed = false;
+  inventoryService: any;
 
   ngOnInit(): void {
-    this.oidcSecurityService.isAuthenticated$.subscribe(
-      ({isAuthenticated}) => {
-        this.isAuthenticated = isAuthenticated;
-        this.productService.getProducts()
-          .pipe()
-          .subscribe(product => {
-            this.products = product;
-          })
-      }
-    )
+    this.productService.getProducts().subscribe(products => {
+      this.products = products;
+      this.products.forEach(p => {
+        this.inventoryService.getInventoryBySku(p.skucode).subscribe(inv => {
+          p.quantidade = inv.quantidade; 
+        });
+      });
+    });
   }
 
   goToCreateProductPage() {
     this.router.navigateByUrl('/add-product');
+  }
+
+  goToUpdateProductPage(id: string) {
+    this.router.navigate(['/update-product', id]);
   }
 
   orderProduct(product: Product, quantity: string) {

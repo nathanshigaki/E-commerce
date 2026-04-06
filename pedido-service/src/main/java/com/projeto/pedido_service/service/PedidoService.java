@@ -40,6 +40,8 @@ public class PedidoService {
         pedidoSalvar.setNumeroPedido(UUID.randomUUID().toString());
         Pedido pedidoSalvo = pedidoRepository.save(pedidoSalvar);
 
+        inventarioClient.decrementStock(pedidoRequest.skucode(), pedidoRequest.quantidade());
+
         return PedidoResponse.fromPedido(pedidoSalvo);
     }
 

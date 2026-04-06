@@ -24,10 +24,37 @@ public class InventarioService {
     }
 
     @Transactional
+    public void decrementStock(String skucode, Integer quantidade) {
+        Inventario item = inventarioRepository.findBySkucode(skucode)
+                .orElseThrow(() -> new RuntimeException("Produto não encontrado no estoque"));
+        
+        if (item.getQuantidade() < quantidade || quantidade < 0) {
+            throw new IllegalArgumentException("Estoque insuficiente para o SKU: " + skucode);
+        }
+
+        item.setQuantidade(item.getQuantidade() - quantidade);
+        inventarioRepository.save(item);
+    }
+
+    @Transactional
+    public void updateQuantidadeManual(String skucode, Integer novaQuantidade) {
+        Inventario item = inventarioRepository.findBySkucode(skucode)
+                .orElseThrow(() -> new RuntimeException("SKU não encontrado"));
+        item.setQuantidade(novaQuantidade);
+        inventarioRepository.save(item);
+    }
+
+    @Transactional
     public InventarioResponse createInventario(InventarioRequest inventarioRequest) {
         Inventario inventarioSalvar = inventarioRequest.toInventario();
         Inventario inventarioSalvo = inventarioRepository.save(inventarioSalvar);
         return InventarioResponse.fromInventario(inventarioSalvo);
+    }
+
+    @Transactional
+    public Inventario getInventarioBySkucode(String skucode) {
+        return inventarioRepository.findBySkucode(skucode)
+                .orElseThrow(() -> new RuntimeException("SKU não encontrado: " + skucode));
     }
 
     @Transactional
