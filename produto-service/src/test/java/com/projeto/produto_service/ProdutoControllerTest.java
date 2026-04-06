@@ -158,7 +158,7 @@ class ProdutoControllerTest {
 	}
 
 	private ProdutoRequest getProdutoRequest(){
-		return new ProdutoRequest("Caneta", "Caneta azul", new BigDecimal(4));
+		return new ProdutoRequest("sgtyhfgcvujy234cgerrfg", "Caneta", "Caneta azul", "CANETA-AZUL", new BigDecimal(4));
 	}
 
 	private Produto getProduto(String nome, String descricao, BigDecimal preco){

@@ -17,9 +17,12 @@ public record PedidoRequest(
     @PositiveOrZero(message = "O preço deve ser maior que zero.")
     BigDecimal preco, 
     
-    @NotNull(message = "O produto deve ter preço mairo que zero.")
+    @NotNull(message = "O produto deve ter preço maior que zero.")
     @PositiveOrZero(message = "O preço deve ser maior que zero.")
-    Integer quantidade) {
+    Integer quantidade,
+    UserDetails userDetails) {
+
+    public record UserDetails(String email, String firstName, String lastName) {}
 
     public Pedido toPedido(){
         Pedido pedido = new Pedido();

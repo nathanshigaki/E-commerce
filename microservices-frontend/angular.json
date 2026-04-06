@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "microservices-shop-frontend": {
+    "microservices-frontend": {
       "projectType": "application",
       "schematics": {},
       "root": "",

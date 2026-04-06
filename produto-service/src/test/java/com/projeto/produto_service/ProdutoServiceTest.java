@@ -51,8 +51,10 @@ class ProdutoServiceTest {
 				.build();
 		
 		produtoRequest = new ProdutoRequest(
+			produto.getId(),
 			produto.getNome(),
 			produto.getDescricao(),
+			produto.getSkucode(),
 			produto.getPreco()
 		);
 
@@ -75,8 +77,10 @@ class ProdutoServiceTest {
 	@Test
 	void testCreateProduto_Fail(){
 		ProdutoRequest produtoInvalido = new ProdutoRequest(
+			"ijbnisfdbghdf",
 			"Nome Teste",
 			"Descricao Teste",
+			"SKU-TESTE",
 			new BigDecimal("-50.00")
     	);
 
