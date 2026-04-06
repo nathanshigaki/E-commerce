@@ -1,0 +1,25 @@
+<div class="container mx-auto p-4">
+  <h2 class="text-2xl font-bold mb-4">Gerenciar Inventário</h2>
+  <table class="min-w-full bg-white border">
+    <thead>
+      <tr>
+        <th class="py-2 px-4 border">SKU Code</th>
+        <th class="py-2 px-4 border">Quantidade Atual</th>
+        <th class="py-2 px-4 border">Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let item of inventarios">
+        <td class="py-2 px-4 border text-center">{{item.skucode}}</td>
+        <td class="py-2 px-4 border text-center">
+          <input type="number" [(ngModel)]="item.quantidade" class="border rounded px-2 w-20">
+        </td>
+        <td class="py-2 px-4 border text-center">
+          <button (click)="atualizarEstoque(item)" class="bg-blue-500 text-white px-3 py-1 rounded">
+            Atualizar
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

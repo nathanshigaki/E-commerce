@@ -3,6 +3,8 @@ import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from "@angular/
 import {Product} from "../../model/product";
 import {ProductService} from "../../services/product/product.service";
 import {NgIf} from "@angular/common";
+import { InventoryService } from '../../services/inventory/inventory.service';
+import { Inventory } from '../../model/inventory';
 
 @Component({
   selector: 'app-add-product',
@@ -14,6 +16,7 @@ import {NgIf} from "@angular/common";
 export class AddProductComponent {
   addProductForm: FormGroup;
   private readonly productService = inject(ProductService);
+  private readonly inventoryService = inject(InventoryService);
   productCreated = false;
 
   constructor(private fb: FormBuilder) {
@@ -21,7 +24,8 @@ export class AddProductComponent {
       skucode: ['', [Validators.required]],
       nome: ['', [Validators.required]],
       descricao: ['', [Validators.required]],
-      preco: [0, [Validators.required]]
+      preco: [0, [Validators.required]],
+      quantidade: [0, [Validators.required, Validators.min(0)]]
     })
   }
 
@@ -33,10 +37,17 @@ export class AddProductComponent {
         descricao: this.addProductForm.get('descricao')?.value,
         preco: this.addProductForm.get('preco')?.value
       }
-      this.productService.createProduct(product).subscribe(product => {
-        this.productCreated = true;
-        this.addProductForm.reset();
-      })
+
+      const inventory: Inventory = {
+        skucode: product.skucode,
+        quantidade: this.addProductForm.get('quantidade')?.value
+      };
+      this.productService.createProduct(product).subscribe(() => {
+        this.inventoryService.createInventario(inventory).subscribe(() => {
+          this.productCreated = true;
+          this.addProductForm.reset();
+        });
+      });
     } else {
       console.log('Form is not valid');
     }

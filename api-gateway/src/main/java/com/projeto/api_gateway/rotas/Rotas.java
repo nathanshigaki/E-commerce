@@ -32,7 +32,7 @@ public class Rotas {
     @Bean
     public RouterFunction<ServerResponse> produtoServiceSwaggerRota(){
         return route("produto_service_swagger")
-            .route(RequestPredicates.path("/aggregate/product-service/v3/api-docs"), http()) 
+            .route(RequestPredicates.path("/aggregate/produto-service/v3/api-docs"), http()) 
             .before(uri("http://localhost:8080"))
             .filter(CircuitBreakerFilterFunctions.circuitBreaker("produtoServiceSwaggerCircuitBreaker", URI.create("forward:/fallbackRoute"))) // CORREÇÃO AQUI
             .before(setPath("/api-docs"))                
