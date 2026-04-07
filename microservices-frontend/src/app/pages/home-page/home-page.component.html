@@ -2,12 +2,12 @@
   <div class="p-4">
     <div class="flex justify-between items-center mb-4">
       <h1 class="text-2xl font-bold mb-4">Products ({{ products.length }})</h1>
-      @if (isAuthenticated) {
+      
         <button class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 ml-4"
                 (click)="goToCreateProductPage()">
           Create Product
         </button>
-      }
+      
     </div>
 
     @if (products.length > 0) {
@@ -23,33 +23,23 @@
       <ul class="list-disc list-inside">
         @for (product of products; track product.id) {
           <li class="mb-2 p-4 bg-gray-100 rounded-lg shadow-sm flex justify-between items-center">
-          <div>
-            <span class="font-semibold">{{ product.nome }}</span> 
-            <span class="text-blue-600 font-bold ml-2">(Estoque: {{ product.quantidade ?? 0 }})</span>
-            <br/>
-            <span class="text-gray-600">Price: {{ product.preco }}</span>
-          </div>
-          </li>
-          <li class="mb-2 p-4 bg-gray-100 rounded-lg shadow-sm flex justify-between items-center">
             <div>
               <span class="font-semibold">{{ product.nome }}</span> -
               <span class="text-gray-600">Price: {{ product.preco }}</span>
+              <span class="text-blue-600 font-bold ml-2">(Estoque: {{ product.quantidade ?? 0 }})</span>
               <br/>
               <span>Quantity: <input type="number" #quantityInput class="border rounded px-2 w-20"/></span>
             </div>
             
             <div class="flex gap-2">
+              <button class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
+                      (click)="goToUpdateProductPage(product.id!)">
+                Edit
+              </button>
               <button class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"
                       (click)="orderProduct(product, quantityInput.value)">
                 Order Now
               </button>
-
-              @if (isAuthenticated) {
-                <button class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
-                        (click)="goToUpdateProductPage(product.id!)">
-                  Edit
-                </button>
-              }
             </div>
           </li>
           }

@@ -1,5 +1,6 @@
 package com.projeto.pedido_service.client;
 
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.service.annotation.GetExchange;
@@ -21,6 +22,9 @@ public interface InventarioClient {
     @PutMapping("/api/inventario/decrement")
     @CircuitBreaker(name = "inventario", fallbackMethod = "fallbackDecrement")
     void decrementStock(@RequestParam String skucode, @RequestParam Integer quantidade);
+
+    @PatchMapping("/api/inventario/skucode/{skucode}")
+    void updateStock(@RequestParam String skucode, @RequestParam Integer quantidade);
 
     default boolean fallbackmethod(String skucode, Integer quantidade, Throwable throwable){
         log.error("Erro ao verificar o estoque para o produto {}: {}", skucode, throwable.getMessage());

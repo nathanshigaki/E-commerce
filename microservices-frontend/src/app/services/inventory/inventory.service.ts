@@ -15,6 +15,10 @@ export class InventoryService {
     return this.httpClient.get<Array<Inventory>>(this.url);
   }
 
+  getInventoryBySkucode(skucode: string): Observable<Inventory> {
+    return this.httpClient.get<Inventory>(`${this.url}/skucode/${skucode}`);
+  }
+
   createInventario(inventory: Inventory): Observable<Inventory> {
     return this.httpClient.post<Inventory>(this.url, inventory);
   }

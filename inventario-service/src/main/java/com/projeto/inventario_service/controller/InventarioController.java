@@ -41,8 +41,8 @@ public class InventarioController {
         return ResponseEntity.ok(inventarioService.getAllInventarios());
     }
 
-    @GetMapping("/detalhes")
-    public Inventario getDetalhes(@RequestParam String skucode) {
+    @GetMapping("/skucode/{skucode}")
+    public Inventario getDetalhes(@PathVariable String skucode) {
         return inventarioService.getInventarioBySkucode(skucode);
     }
     

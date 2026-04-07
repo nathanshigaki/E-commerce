@@ -7,6 +7,7 @@ import {Router} from "@angular/router";
 import {Order} from "../../model/order";
 import {FormsModule} from "@angular/forms";
 import {OrderService} from "../../services/order/order.service";
+import { InventoryService } from '../../services/inventory/inventory.service';
 
 @Component({
   selector: 'app-homepage',
@@ -23,19 +24,19 @@ export class HomePageComponent implements OnInit {
   private readonly oidcSecurityService = inject(OidcSecurityService);
   private readonly productService = inject(ProductService);
   private readonly orderService = inject(OrderService);
+  private readonly inventoryService = inject(InventoryService);
   private readonly router = inject(Router);
   isAuthenticated = false;
   products: Array<Product & { quantidade?: number }> = [];
   quantityIsNull = false;
   orderSuccess = false;
   orderFailed = false;
-  inventoryService: any;
 
   ngOnInit(): void {
     this.productService.getProducts().subscribe(products => {
       this.products = products;
       this.products.forEach(p => {
-        this.inventoryService.getInventoryBySku(p.skucode).subscribe(inv => {
+        this.inventoryService.getInventoryBySkucode(p.skucode).subscribe(inv => {
           p.quantidade = inv.quantidade; 
         });
       });
