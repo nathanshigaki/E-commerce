@@ -24,7 +24,7 @@ export class InventoryService {
   }
 
   updateInventario(id: number, inventory: Inventory): Observable<Inventory> {
-    return this.httpClient.put<Inventory>(`${this.url}/${id}`, inventory);
+    return this.httpClient.patch<Inventory>(`${this.url}/${id}`, inventory);
   }
 
   deleteInventario(id: number): Observable<void> {

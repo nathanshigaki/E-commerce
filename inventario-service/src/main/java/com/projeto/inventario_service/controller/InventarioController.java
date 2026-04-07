@@ -42,8 +42,8 @@ public class InventarioController {
     }
 
     @GetMapping("/skucode/{skucode}")
-    public Inventario getDetalhes(@PathVariable String skucode) {
-        return inventarioService.getInventarioBySkucode(skucode);
+    public ResponseEntity<InventarioResponse> getDetalhes(@PathVariable String skucode) {
+        return ResponseEntity.ok(inventarioService.getInventarioBySkucode(skucode));
     }
     
     @PatchMapping("/{id}")

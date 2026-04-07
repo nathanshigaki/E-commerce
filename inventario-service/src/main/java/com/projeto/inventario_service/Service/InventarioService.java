@@ -2,7 +2,10 @@ package com.projeto.inventario_service.Service;
 
 import java.util.List;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import com.projeto.inventario_service.Repository.InventarioRepository;
 import com.projeto.inventario_service.dto.InventarioRequest;
@@ -52,9 +55,12 @@ public class InventarioService {
     }
 
     @Transactional
-    public Inventario getInventarioBySkucode(String skucode) {
-        return inventarioRepository.findBySkucode(skucode)
-                .orElseThrow(() -> new RuntimeException("SKU não encontrado: " + skucode));
+    public InventarioResponse getInventarioBySkucode(String skucode) {
+        List<Inventario> resultados = inventarioRepository.findAllBySkucode(skucode);
+        if (resultados.isEmpty()) {
+            throw new RuntimeException("SKU não encontrado: " + skucode);
+        }
+        return InventarioResponse.fromInventario(resultados.get(0));
     }
 
     @Transactional

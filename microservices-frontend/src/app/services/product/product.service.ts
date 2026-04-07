@@ -19,12 +19,11 @@ export class ProductService {
     return this.httpClient.post<Product>('http://localhost:9000/api/produto', product);
   }
 
-  // src/app/services/product/product.service.ts
   getProductById(id: string): Observable<Product> {
     return this.httpClient.get<Product>(`http://localhost:9000/api/produto/${id}`);
   }
 
   updateProduct(id: string, product: Product): Observable<Product> {
-    return this.httpClient.put<Product>(`http://localhost:9000/api/produto/${id}`, product);
+    return this.httpClient.patch<Product>(`http://localhost:9000/api/produto/${id}`, product);
   }
 }
