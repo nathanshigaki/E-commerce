@@ -22,6 +22,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.projeto.pedido_service.client.InventarioClient;
 import com.projeto.pedido_service.dto.PedidoRequest;
+import com.projeto.pedido_service.dto.PedidoRequest.UserDetails;
 import com.projeto.pedido_service.dto.PedidoResponse;
 import com.projeto.pedido_service.exception.PedidoNotFoundException;
 import com.projeto.pedido_service.model.Pedido;
@@ -45,6 +46,8 @@ class PedidoServiceTest {
 
     @BeforeEach
     void setUp(){
+        var userDetails = new UserDetails("teste@email.com", "teste", "teste");
+
         pedido = new Pedido(
             1L, 
             "a12bc3", 
@@ -56,7 +59,8 @@ class PedidoServiceTest {
         pedidoRequest = new PedidoRequest(
             pedido.getSkucode(), 
             pedido.getPreco(), 
-            pedido.getQuantidade()
+            pedido.getQuantidade(),
+            userDetails
         );
     }
 
@@ -74,6 +78,7 @@ class PedidoServiceTest {
         assertEquals(2, resultado.quantidade());
         verify(inventarioClient, times(1)).isInStock(any(), any());
         verify(pedidoRepository, times(1)).save(any(Pedido.class));
+        verify(inventarioClient, times(1)).decrementStock(pedidoRequest.skucode(), pedidoRequest.quantidade());
     }
 
     @Test
@@ -89,7 +94,8 @@ class PedidoServiceTest {
 
     @Test
     void testCreatePedido_Fail_PrecoInvalido(){
-        PedidoRequest pedidoInvalido = new PedidoRequest("SKU456", new BigDecimal("-50.00"), 1);
+        var userDetails = new UserDetails("teste@email.com", "teste", "teste"); 
+        PedidoRequest pedidoInvalido = new PedidoRequest("SKU456", new BigDecimal("-50.00"), 1, userDetails);
 
         assertThrows(IllegalArgumentException.class, 
             () -> pedidoService.createPedido(pedidoInvalido));
@@ -181,5 +187,6 @@ class PedidoServiceTest {
             () -> pedidoService.deletePedido(idInexistente));
         assertEquals("Pedido não encontrado.", exception.getMessage());
         verify(pedidoRepository, never()).delete(any());
+        assertThrows(PedidoNotFoundException.class, () -> pedidoService.deletePedido(idInexistente));
     }
 }

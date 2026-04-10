@@ -50,7 +50,7 @@ class InventarioControllerTest {
 	void shouldCheckIfIsInStock(){
 		Boolean response = RestAssured.given()
                 .when()
-                .get("/api/inventario?skucode=caneta_azul&quantidade=1")
+                .get("/api/inventario/check-stock?skucode=caneta_azul&quantidade=1")
                 .then()
                 .log().all()
                 .statusCode(200)
@@ -59,7 +59,7 @@ class InventarioControllerTest {
 
 		Boolean negativeResponse = RestAssured.given()
                 .when()
-                .get("/api/inventario?skucode=caneta_azul&quantidade=1000")
+                .get("/api/inventario/check-stock?skucode=caneta_azul&quantidade=1000")
                 .then()
                 .log().all()
                 .statusCode(200)

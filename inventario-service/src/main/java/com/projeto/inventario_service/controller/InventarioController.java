@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.projeto.inventario_service.Service.InventarioService;
 import com.projeto.inventario_service.dto.InventarioRequest;
 import com.projeto.inventario_service.dto.InventarioResponse;
-import com.projeto.inventario_service.model.Inventario;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

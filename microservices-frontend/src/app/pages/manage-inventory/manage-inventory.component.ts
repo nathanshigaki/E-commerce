@@ -30,7 +30,7 @@ export class ManageInventoryComponent implements OnInit {
     }
   }
 
-  trackByFn(index: number, item: any) {
-    return item.skucode; // Ou o ID único do objeto
+  trackByFn(_index: number, item: any) {
+    return item.skucode; 
   }
 }

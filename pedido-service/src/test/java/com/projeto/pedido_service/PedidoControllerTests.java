@@ -17,6 +17,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.projeto.pedido_service.Stub.InventarioClientStub;
 import com.projeto.pedido_service.dto.PedidoRequest;
+import com.projeto.pedido_service.dto.PedidoRequest.UserDetails;
 import com.projeto.pedido_service.model.Pedido;
 import com.projeto.pedido_service.repository.PedidoRepository;
 
@@ -139,7 +140,8 @@ class PedidoControllerTests {
     }
 
     private PedidoRequest getPedidoRequest(){
-        return new PedidoRequest("SKU-123", new BigDecimal(65), 1);
+        var userDetails = new UserDetails("teste@gmail.com", "teste", "teste");
+        return new PedidoRequest("SKU-123", new BigDecimal(65), 1, userDetails);
     }
 
     private Pedido getPedido(String numeroPedido, String skucode, BigDecimal preco, int quantidade ){

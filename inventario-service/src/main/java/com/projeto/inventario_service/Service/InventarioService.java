@@ -2,11 +2,7 @@ package com.projeto.inventario_service.Service;
 
 import java.util.List;
 
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-
 import com.projeto.inventario_service.Repository.InventarioRepository;
 import com.projeto.inventario_service.dto.InventarioRequest;
 import com.projeto.inventario_service.dto.InventarioResponse;
