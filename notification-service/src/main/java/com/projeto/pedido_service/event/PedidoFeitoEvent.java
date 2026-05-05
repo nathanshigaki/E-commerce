@@ -1,4 +1,4 @@
-package com.projeto.pedido.event;
+package com.projeto.pedido_service.event;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
