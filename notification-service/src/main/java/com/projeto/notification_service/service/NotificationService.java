@@ -1,6 +1,5 @@
 package com.projeto.notification_service.service;
 
-import org.apache.kafka.common.utils.Java;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;

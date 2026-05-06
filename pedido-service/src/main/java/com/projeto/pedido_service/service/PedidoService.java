@@ -45,7 +45,9 @@ public class PedidoService {
         pedidoSalvar.setNumeroPedido(UUID.randomUUID().toString());
         Pedido pedidoSalvo = pedidoRepository.save(pedidoSalvar);
 
-        PedidoFeitoEvent pedidoFeitoEvent = new PedidoFeitoEvent(pedidoSalvar.getNumeroPedido(), pedidoRequest.userDetails().email());
+        PedidoFeitoEvent pedidoFeitoEvent = new PedidoFeitoEvent();
+        pedidoFeitoEvent.setNumeroPedido(pedidoSalvo.getNumeroPedido());
+        pedidoFeitoEvent.setEmail(pedidoRequest.userDetails().email());
         log.info("Enviando evento de pedido feito para Kafka: {}", pedidoFeitoEvent);
         kafkaTemplate.send("pedido-feito", pedidoFeitoEvent);
         log.info("Evento de pedido feito enviado para Kafka: {}", pedidoFeitoEvent);

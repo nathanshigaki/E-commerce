@@ -1,0 +1,9 @@
+{
+  "type": "record",
+  "name": "PedidoFeitoEvent",
+  "namespace": "com.projeto.pedido_service.event",
+  "fields": [
+    { "name": "numeroPedido", "type": "string" },
+    { "name": "email", "type": "string" }
+  ]
+}
