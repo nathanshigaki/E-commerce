@@ -4,6 +4,7 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 volume-data
+**/tempo/tempo-data
 
 ### STS ###
 .apt_generated
