@@ -13,21 +13,28 @@ import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 
 import com.projeto.pedido_service.client.InventarioClient;
 
+import io.micrometer.observation.ObservationRegistry;
+import lombok.RequiredArgsConstructor;
+
 @Configuration
+@RequiredArgsConstructor
 public class RestClientConfig {
 
     @Value("${inventario.url}")
     private String inventarioServiceUrl;
 
+    private final ObservationRegistry observationRegistry;
+
     @Bean
     public InventarioClient inventarioClient(){
         RestClient restClient = RestClient.builder()
-            .baseUrl(inventarioServiceUrl)
-            .requestFactory(getClientRequestFactory())
-            .build();
+                .baseUrl(inventarioServiceUrl)
+                .requestFactory(getClientRequestFactory())
+                .observationRegistry(observationRegistry)
+                .build();
         var restClientAdapter = RestClientAdapter.create(restClient);
         var httpServiceProxyFactory = HttpServiceProxyFactory.builderFor(restClientAdapter).build();
-        return httpServiceProxyFactory.createClient(InventarioClient.class);    
+        return httpServiceProxyFactory.createClient(InventarioClient.class);  
     }
 
     private ClientHttpRequestFactory getClientRequestFactory() {

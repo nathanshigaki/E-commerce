@@ -1,0 +1,24 @@
+# IDEs e Editores
+.vscode/
+.idea/
+*.iml
+*.iws
+*.ipr
+.classpath
+.project
+.settings/
+
+# Build & Dependências (caso compilado na raiz)
+target/
+build/
+bin/
+node_modules/
+
+# Logs e dados locais
+*.log
+.DS_Store
+Thumbs.db
+
+# Dados dos containers locais (se persistidos fora de pastas ignoradas)
+**/volume-data/
+**/tempo-data/
